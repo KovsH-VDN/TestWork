@@ -1,0 +1,224 @@
+﻿<Window x:Class="Pandemic.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Pandemic"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        mc:Ignorable="d"
+        Title="Pandemic" Height="450" MinHeight="450" Width="750" MinWidth="750" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Базовые задания">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                    <GroupBox BorderBrush="#FF125A97" Header="Средний возраст ">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="searchName" Margin="1"/>
+                            <Button Margin="1" Width="50" Grid.Column="1" Command="{Binding CommandFindAverageAge}" CommandParameter="{Binding ElementName=searchName, Path=Text}">Найти</Button>
+                            <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding AverageAge}"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <GroupBox Grid.Column="1" BorderBrush="#FF125A97" Header="Поиск контактов в диапазоне времени">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Margin="0,3,0,0">Начало диапазона:</TextBlock>
+                                <TextBlock Margin="0,9,0,0">Конец диапазона:</TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <DatePicker ToolTip="Укажиет время через пробел в формате: чч:мм:сс" SelectedDate="{Binding From}"/>
+                                <DatePicker ToolTip="Укажиет время через пробел в формате: чч:мм:сс" SelectedDate="{Binding To}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Button Margin="1,2,1,1" Width="50" Command="{Binding CommandFindContactsInRange}">Найти</Button>
+                                <Button Margin="1,3,1,1" Width="50" Command="{Binding CommandResetListViewContacts}">Сброс</Button>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+
+                    <ListView x:Name="listPersons" Grid.Row="1" ItemsSource="{Binding Persons}">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Name}"/>
+                                <GridViewColumn Header="Возраст" DisplayMemberBinding="{Binding Age}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <ListView x:Name="listContacts" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Contacts}">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Начало" DisplayMemberBinding="{Binding From, StringFormat=dd/MM/yy HH:mm:ss}"/>
+                                <GridViewColumn Header="Окончание" DisplayMemberBinding="{Binding To, StringFormat=dd/MM/yy HH:mm:ss}"/>
+                                <GridViewColumn Header="Субъект 1" DisplayMemberBinding="{Binding Member1_ID}"/>
+                                <GridViewColumn Header="Субъект 2" DisplayMemberBinding="{Binding Member2_ID}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Header="Расширенные задания">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="45*"/>
+                        <ColumnDefinition Width="55*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock>Нулевой пациент:</TextBlock>
+
+                        <TextBlock Grid.Row="1">ID:</TextBlock>
+                        <TextBox Margin="1" Grid.Row="1" Grid.Column="1" Text="{Binding IdNullPatient}"/>
+
+                        <TextBlock Margin="0,3" Grid.Row="2">Время заражения:</TextBlock>
+                        <DatePicker ToolTip="Укажиет время через пробел в формате: чч:мм:сс" Margin="1" Grid.Column="1" Grid.Row="2" SelectedDate="{Binding DateNullPatientInfection}"/>
+                    </Grid>
+                    <TextBlock Foreground="Red" Grid.Row="1" Text="{Binding Info}"></TextBlock>
+                    <Button Margin="1" Width="120" HorizontalAlignment="Right" Grid.Row="1" Command="{Binding CommandBuildTreeView}">Построить дерево</Button>
+                    <TreeView Grid.Row="2" x:Name="infectedTree" ItemsSource="{Binding Patients, Mode=OneWay}"
+                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                  VirtualizingStackPanel.VirtualizationMode="Recycling">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate DataType="x:Type Patient" ItemsSource="{Binding Path=Patients}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Person.Name}"/>
+                                    <TextBlock Text=" "/>
+                                    <TextBlock Text="{Binding Person.LastInfectionTime, StringFormat=dd/MM/yy HH:mm:ss}"/>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+                    <StackPanel Grid.Column="1" Grid.RowSpan="2">
+                        <TextBlock>Данные о пандемии:</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Общее количество переболевших: "/>
+                            <TextBlock Text="{Binding TotalInfected}"/>
+                            <TextBlock Text=" человек."></TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Количество зараженных на пике: "/>
+                            <TextBlock Text="{Binding PeacDate}"/>
+                            <TextBlock Text=" - "/>
+                            <TextBlock Text="{Binding PeacInfected}"/>
+                            <TextBlock Text=" человек."/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Потери экономики: "/>
+                            <TextBlock Text="{Binding LossOfEconomy}"/>
+                            <TextBlock Text=" человеко-часов."/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TabControl Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+                        <TabItem Header="Список зараженных">
+                            <Grid>
+                                <ListView ScrollViewer.VerticalScrollBarVisibility="Auto" x:Name="listInfected" ItemsSource="{Binding InfectedPersons}">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Name}"/>
+                                            <GridViewColumn Header="Возраст" DisplayMemberBinding="{Binding Age}"/>
+                                            <GridViewColumn Header="Дата заражения" DisplayMemberBinding="{Binding LastInfectionTime, StringFormat=dd/MM/yy HH:mm:ss}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Динамика заражения">
+                            <Grid>
+                                <oxy:Plot DataContext="{Binding GraficDataContext}" Title="Динамика заражения">
+                                    <oxy:Plot.Axes>
+                                        <oxy:LinearAxis
+                                            IntervalLength="25"
+                                            Position="Left"
+                                            AbsoluteMinimum="0"
+                                            Minimum="0"
+                                            AbsoluteMaximum="{Binding MaxPerDay}"
+                                            Maximum="{Binding MaxPerDay}"/>
+                                        <oxy:DateTimeAxis
+                                            FontSize="8"
+                                            MajorGridlineThickness="2"
+                                            IntervalLength="1"
+                                            IntervalType="Weeks"
+                                            Position="Bottom"
+                                            Minimum="{Binding BeginPandemic}"
+                                            AbsoluteMinimum="{Binding BeginPandemic}"
+                                            Maximum="{Binding EndPandemic}"
+                                            AbsoluteMaximum="{Binding EndPandemic}"
+                                            StringFormat="dd/MM"/>
+                                    </oxy:Plot.Axes>
+                                    <oxy:LineSeries ItemsSource="{Binding DinamycPoints}"></oxy:LineSeries>
+                                </oxy:Plot>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Тренд заражения">
+                            <Grid>
+                                <oxy:Plot DataContext="{Binding GraficDataContext}" Title="Тренд заражения">
+                                    <oxy:Plot.Axes>
+                                        <oxy:LinearAxis
+                                            IntervalLength="25"
+                                            Position="Left"
+                                            AbsoluteMinimum="0"
+                                            Minimum="0"
+                                            AbsoluteMaximum="{Binding TotalInfected}"
+                                            Maximum="{Binding TotalInfected}"/>
+                                        <oxy:DateTimeAxis
+                                            FontSize="8"
+                                            MajorGridlineThickness="2"
+                                            IntervalLength="1"
+                                            IntervalType="Weeks"
+                                            Position="Bottom"
+                                            Minimum="{Binding BeginPandemic}"
+                                            AbsoluteMinimum="{Binding BeginPandemic}"
+                                            Maximum="{Binding EndPandemic}"
+                                            AbsoluteMaximum="{Binding EndPandemic}"
+                                            StringFormat="dd/MM"/>
+                                    </oxy:Plot.Axes>
+                                    <oxy:LineSeries Title="Общее количество заразившихся" Color="Red" ItemsSource="{Binding TotalInfectedPoints}"></oxy:LineSeries>
+                                    <oxy:LineSeries Title="Болеющие" Color="Blue" ItemsSource="{Binding CurrentInfectedPoints}"></oxy:LineSeries>
+                                </oxy:Plot>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
